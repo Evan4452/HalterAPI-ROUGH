@@ -1,0 +1,4 @@
+^GSPC: Bullish (Strength: -2)
+^IXIC: Bullish (Strength: -2)
+^DJI: Bullish (Strength: -2)
+DX-Y.NYB: Bearish (Strength: 0)

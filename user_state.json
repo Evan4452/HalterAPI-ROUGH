@@ -1,0 +1,16 @@
+{
+  "ETF_max_size": 20.06,
+  "ETF_min_size": 10.0,
+  "ETF_stop_loss": 134.85,
+  "ETF_take_profit": 189.21,
+  "buy_min_indicators": 4,
+  "sell_min_indicators": 4,
+  "exp_from": 1,
+  "exp_to": 60,
+  "etf_options_mode": true,
+  "fallback_bias": false,
+  "day_trade": false,
+  "bias_only": false,
+  "bullish_only": false,
+  "bearish_only": false
+}

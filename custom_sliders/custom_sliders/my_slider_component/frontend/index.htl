@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Slider Component</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 10px 20px;
+      }
+      .custom-slider { margin: 25px 0; }
+      .custom-slider-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+      }
+      .custom-slider-track {
+        position: relative;
+        height: 6px;
+        background: rgba(151,166,195,0.25);
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+      }
+      .custom-slider-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: #ffe899;
+        border-radius: 4px;
+      }
+      .custom-slider-thumb {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translate(-50%, -50%);
+        width: 18px;
+        height: 18px;
+        background: #fff;
+        border: 2px solid #ccc;
+        border-radius: 50%;
+        cursor: grab;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="custom-slider">
+      <div class="custom-slider-label">Minimum Bullish Indicators</div>
+      <div class="custom-slider-track" id="buy-track">
+        <div class="custom-slider-fill" id="buy-fill"></div>
+        <div class="custom-slider-thumb" id="buy-thumb"></div>
+      </div>
+      <div>Value: <span id="buy-value">0</span></div>
+    </div>
+
+    <div class="custom-slider">
+      <div class="custom-slider-label">Minimum Bearish Indicators</div>
+      <div class="custom-slider-track" id="sell-track">
+        <div class="custom-slider-fill" id="sell-fill"></div>
+        <div class="custom-slider-thumb" id="sell-thumb"></div>
+      </div>
+      <div>Value: <span id="sell-value">0</span></div>
+    </div>
+
+    <script src="slider.js"></script>
+  </body>
+</html>
