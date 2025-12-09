@@ -8,3 +8,4 @@ st-aggrid==1.1.6
 ta==0.11.0
 alpaca-py==0.40.1
 python-dotenv==1.0.1
+msgpack==1.0.3
