@@ -6,9 +6,7 @@ import time
 import threading
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from colorsys import rgb_to_hls
-import textwrap
-from time import sleep
+
 
 import streamlit as st
 
@@ -1138,13 +1136,8 @@ restore_connection_state()
 
 import threading
 import time
-import streamlit as st
 
 
-
-
-import threading
-import time
 
 
 if "trade_thread" not in st.session_state:
