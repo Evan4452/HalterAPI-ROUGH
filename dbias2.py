@@ -419,7 +419,7 @@ st.markdown("""
         /* ❗ Keep left/right margins EXACTLY how they were (not shrinking) */
         .block-container {
             width: 770px !important;          /* 800px - 2×20px margin effect */
-            max-width: 770px !important;
+            max-width: 764px !important;
             margin-left: auto !important;
             margin-right: auto !important;
             padding: 0 1rem !important;        /* padding stays same */
@@ -498,8 +498,19 @@ st.markdown("""
 
 
 
-
-
+st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] {
+            width: 200px !important; /* change this value */
+        }
+        section[data-testid="stSidebar"] > div {
+            width: 200px !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 
 
@@ -1419,7 +1430,7 @@ with tabs[0]:
 
 
     with col2:
-        st.markdown("""<div style="margin-top: 10px;"></div>""", unsafe_allow_html=True)
+        st.markdown("""<div style="margin-top: 23px;"></div>""", unsafe_allow_html=True)
         with st.expander("Accounts") as expander:
             selected_account = st.selectbox(
                 "Select Account",
@@ -4183,7 +4194,7 @@ with tabs[3]:
             top: -568px;           /* Moves box up by 100px */
             left: 152.5%;             /* Moves box 20% to the right from centered 50% */
             width: 100%;
-            height: 405px;
+            height: 395px;
             background-color: rgb(42, 42, 42);
             border: 4px solid rgb(26, 27, 28);
             border-radius: 20px;
@@ -4434,89 +4445,55 @@ with tabs[3]:
             col1 = st.columns(1)[0]
 
             # ✅ Clean + functional slider CSS with fixed 50% fill and smooth fades
-            css = """
-            <style>
-            /* ====== TRACKS ====== */
-
-            /* Bullish Track with fixed 50% fill from #ffe899 to #444444 */
-            div[data-testid="stSlider"]:nth-of-type(1) div[data-baseweb="slider"] > div > div {
-            background: linear-gradient(to right,
-                #ffe899 0%,
-                #ffe899 24%,
-                #444444 56%,
-                #444444 100%
-            ) !important;
-
-
-                height: 6px !important;
-                border-radius: 3px !important;
-                box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-            }
-
-            /* Bearish Track with fixed 50% fill from #EF4444 to #DC2626 */
-            div[data-testid="stSlider"]:nth-of-type(2) div[data-baseweb="slider"] > div > div {
-                background: linear-gradient(to right,
-                    #EF4444 0%,
-                    #EF4444 34%,
-                    #DC2626 66%,
-                    #DC2626 100%
-                ) !important;
-                height: 6px !important;
-                border-radius: 3px !important;
-                box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
-            }
-
-            /* ====== THUMBS ====== */
-
-            div[data-testid="stSlider"] div[role="slider"] {
-                background: #fff !important;
-                border: 2px solid transparent !important;
-                width: 14px !important;
-                height: 14px !important;
-                border-radius: 50% !important;
-                margin-top: 0px !important;
-                box-shadow:
-                    0 2px 4px rgba(0,0,0,0.25),
-                    0 0 0 2px rgba(255,255,255,0.9) inset !important;
-                transition: box-shadow 0.15s ease-in-out;
-                cursor: pointer !important;
-                outline: none !important;
-            }
-
-            /* Thumb border colors */
-            div[data-testid="stSlider"]:nth-of-type(1) div[role="slider"] {
-                border-color: #ffe899 !important;
-            }
-
-            div[data-testid="stSlider"]:nth-of-type(2) div[role="slider"] {
-                border-color: #EF4444 !important;
-            }
-
-            /* Hover and active states */
-            div[data-testid="stSlider"] div[role="slider"]:hover {
-                box-shadow:
-                    0 3px 6px rgba(0,0,0,0.35),
-                    0 0 0 3px rgba(255,255,255,0.9) inset !important;
-            }
-
-            div[data-testid="stSlider"] div[role="slider"]:active {
-                box-shadow:
-                    0 4px 8px rgba(0,0,0,0.4),
-                    0 0 0 3px rgba(255,255,255,0.9) inset !important;
-            }
-
-            /* Hide tick bar */
-            div[data-testid="stTickBar"] > div {
-                background: transparent !important;
-            }
-            </style>
-            """
 
 
 
 
-            st.markdown(css, unsafe_allow_html=True)
 
+
+            import streamlit as st
+
+            st.markdown(
+                """
+                <style>
+                /* Make filled track yellow (as before) */
+                :root {
+                    --primary-color: yellow;
+                }
+
+                /* Make thumb a solid black circle - Chrome/Safari/Edge */
+                div[data-testid="stSlider"] input[type="range"]::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 20px !important;          /* Size of the circle */
+                    height: 20px !important;
+                    border-radius: 50% !important;   /* Perfect circle */
+                    background: black !important;    /* Solid black */
+                    border: none !important;         /* Remove any default border */
+                    cursor: pointer;
+                    box-shadow: 0 0 4px rgba(0,0,0,0.5); /* Optional subtle shadow for depth */
+                }
+
+                /* Firefox thumb */
+                div[data-testid="stSlider"] input[type="range"]::-moz-range-thumb {
+                    width: 20px !important;
+                    height: 20px !important;
+                    border-radius: 50% !important;
+                    background: black !important;
+                    border: none !important;
+                    cursor: pointer;
+                    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+                }
+
+                /* Optional: Slightly enlarge the clickable area on hover */
+                div[data-testid="stSlider"] input[type="range"]::-webkit-slider-thumb:hover,
+                div[data-testid="stSlider"] input[type="range"]::-moz-range-thumb:hover {
+                    transform: scale(1.1);
+                }
+                </style>
+                """,
+                unsafe_allow_html=True
+            )
 
 
 
@@ -5033,7 +5010,7 @@ with tabs[3]:
                 </div>
                 """
 
-            col_left, col_right = st.columns(2)
+            col_left, col_mid, col_right = st.columns([1, 0.01, 1])
             with col_left:
                 st.markdown(bias_box_html('SPY', bias_details['SPY']), unsafe_allow_html=True)
                 st.markdown(bias_box_html('DIA', bias_details['DIA']), unsafe_allow_html=True)
@@ -5823,9 +5800,6 @@ if "last_bias" not in st.session_state:
 
 
 
-
-
-
 from yahoo_earnings_calendar import YahooEarningsCalendar
 import datetime
 
@@ -6042,14 +6016,7 @@ import pandas as pd
 import numpy as np
 import talib
 import alpaca_trade_api as tradeapi
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from fake_useragent import UserAgent
+
 
 # --- Alpaca Trading API ---
 from alpaca.trading.client import TradingClient
