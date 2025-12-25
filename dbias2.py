@@ -100,6 +100,8 @@ default_settings = {
 import streamlit as st
 
 # ---------- SIMPLE PASSWORD GATE ----------
+import streamlit as st
+
 PASSWORD = "hustletime"
 
 if "authenticated" not in st.session_state:
@@ -107,17 +109,20 @@ if "authenticated" not in st.session_state:
 
 if not st.session_state.authenticated:
     st.title("HalterAPI: Developer Access")
-    pwd = st.text_input("Enter access code:", type="password")
-    login = st.button("Unlock")
 
-    if login:
-        if pwd == PASSWORD:
-            st.session_state.authenticated = True
-            st.success("Access granted")
-            st.rerun()  # reload app in authenticated state
-        else:
-            st.error("Incorrect code")
-    st.stop()  # ❗ prevent rest of app from rendering
+    with st.form(key="login_form"):
+        pwd = st.text_input("Enter access code:", type="password", key="password_input")
+        submit = st.form_submit_button("Unlock")
+
+        if submit:
+            if pwd == PASSWORD:
+                st.session_state.authenticated = True
+                st.success("Access granted")
+                st.rerun()
+            else:
+                st.error("Incorrect code")
+
+    st.stop()  # Prevent rest of app from rendering
 
 
 
