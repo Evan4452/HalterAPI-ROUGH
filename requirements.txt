@@ -11,3 +11,4 @@ python-dotenv==1.0.1
 msgpack==1.0.3
 TA-Lib
 alpaca-trade-api
+yahoo-earnings-calendar
