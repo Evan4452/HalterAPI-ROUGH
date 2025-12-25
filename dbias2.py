@@ -5034,13 +5034,18 @@ with tabs[3]:
             """
             st.markdown(market_html, unsafe_allow_html=True)
 
-            def bias_box_html(symbol, bias):
-                color = bias_colors[bias]
-                bg = bias_bg[bias]
+            def bias_box_html(symbol, bias):  # Order: symbol first or adjust as needed
+                if bias == "Bullish":
+                    color = "#2ace49"  # Green
+                elif bias == "Bearish":
+                    color = "#FF4B4B"  # Red
+                else:
+                    color = "#c0c0c0"  # Gray for Neutral, Insufficient Data, errors, etc.
+
                 return f"""
-                <div class="bias-box" style="--glow-color:{color}; background:{bg};max-width: 100%;">
-                    <div class="label">{symbol}</div>
-                    <div class="subtext">{bias}</div>
+                <div style="padding: 8px 12px; border-radius: 6px; background-color: {color}20; 
+                            border: 1px solid {color}; color: {color}; font-weight: bold; text-align: center;">
+                    {symbol}: {bias}
                 </div>
                 """
 
