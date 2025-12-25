@@ -12,3 +12,4 @@ msgpack==1.0.3
 TA-Lib
 alpaca-trade-api
 yahoo-earnings-calendar
+yahoo_fin
