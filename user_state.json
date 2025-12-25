@@ -1,10 +1,10 @@
 {
-  "ETF_max_size": 5.13,
+  "ETF_max_size": 12.09,
   "ETF_min_size": 10.0,
   "ETF_stop_loss": 133.32,
   "ETF_take_profit": 199.57,
-  "buy_min_indicators": 4,
-  "sell_min_indicators": 4,
+  "buy_min_indicators": 1,
+  "sell_min_indicators": 1,
   "exp_from": 1,
   "exp_to": 60,
   "etf_options_mode": true,

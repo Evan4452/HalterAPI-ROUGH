@@ -1,0 +1,50 @@
+{
+    "Scraper": {
+        "category_data": {
+            "ETFs": {
+                "scraper_urls": "hu\nwa\nf",
+                "url_scraper_disliked": "",
+                "final_tickers": [
+                    "HU",
+                    "WA",
+                    "F"
+                ],
+                "max_tickers": 101,
+                "loop_break": 60
+            },
+            "Options": {
+                "scraper_urls": "https://finance.yahoo.com/markets/stocks/losers/",
+                "url_scraper_disliked": "",
+                "final_tickers": [
+                    "ASTS",
+                    "HYMC",
+                    "QBTS",
+                    "BETA",
+                    "PPTA",
+                    "FRMI",
+                    "IONQ",
+                    "ONON",
+                    "KTOS",
+                    "QUBT",
+                    "RGC"
+                ],
+                "max_tickers": 100,
+                "loop_break": 60
+            },
+            "Equity": {
+                "scraper_urls": "",
+                "url_scraper_disliked": "",
+                "final_tickers": [],
+                "max_tickers": 100,
+                "loop_break": 60
+            },
+            "Crypto": {
+                "scraper_urls": "",
+                "url_scraper_disliked": "",
+                "final_tickers": [],
+                "max_tickers": 100,
+                "loop_break": 60
+            }
+        }
+    }
+}

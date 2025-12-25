@@ -82,7 +82,15 @@ default_settings = {
     "alpaca_api_key": "",
     "alpaca_api_secret": "",
     "alpaca_base_url": "https://paper-api.alpaca.markets",
+    # === ADD THIS: Persistent scraper data ===
+    "per_tab_data": {
+        "Scraper": {
+            "category_data": {}  # Will be populated with {category: {scraper_urls: ..., max_tickers: ...}}
+        }
+        # You can add other tabs later if needed
+    }
 }
+
 
 
 
@@ -136,20 +144,32 @@ import json
 
 def load_settings():
     if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r") as f:
-            data = json.load(f)
-        if isinstance(data, dict):
-            # Ensure all keys exist
-            for key, value in default_settings.items():
-                if key not in data:
-                    data[key] = value
-            return data
-        else:
-            print("Settings file is not a dict. Resetting to defaults.")
+        try:
+            with open(SETTINGS_FILE, "r") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                # Merge with defaults
+                merged = default_settings.copy()
+                merged.update(data)  # Overwrite with saved values
+                # Ensure nested structures exist
+                if "per_tab_data" not in merged:
+                    merged["per_tab_data"] = default_settings["per_tab_data"]
+                return merged
+        except Exception as e:
+            st.error(f"Error loading settings: {e}. Using defaults.")
     return default_settings.copy()
 
 # Load settings
 settings = load_settings()
+
+
+# === RESTORE per_tab_data FROM SAVED FILE ===
+if "per_tab_data" not in st.session_state:
+    st.session_state.per_tab_data = settings.get("per_tab_data", default_settings["per_tab_data"])
+
+
+
+
 
 
 
@@ -355,7 +375,7 @@ st.markdown("""
         /* Remove padding and margin from main content block */
         .block-container {
             padding-top: 0 !important;
-            margin-top: -6rem !important;
+            margin-top: -9rem !important;
         }
 
         /* Remove margin/padding from main section */
@@ -2158,10 +2178,12 @@ with tabs[0]:
                 max_dollars = cash * (pct / 100)
                 min_reserve = cash - max_dollars
 
-                st.markdown("<div style='height:20px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
 
                 st.write(f"Maximum invested amount: **${max_dollars:,.2f}**")
                 st.write(f"Minimum cash reserve: **${min_reserve:,.2f}**")
+
+                st.markdown("<div style='height:5px;'></div>", unsafe_allow_html=True)
 
 
 
@@ -2195,16 +2217,16 @@ with tabs[0]:
 
 with tabs[1]:
     st.markdown(f"<h2 style='color: {primary_color};'>Options</h2>", unsafe_allow_html=True)
-    st.write("Option trades for stocks.")
+    st.write("Page in construction.")
     if st.session_state.active_tab == "Options":
         st.session_state.active_tab = "Options"
 
 
 
 
-    col1, col2 = st.columns([4, 1])  # adjust ratios for good spacing
+    col1, col2, col3 = st.columns([8, 4 ,1])  # adjust ratios for good spacing
 
-    with col1:
+    with col2:
         st.markdown(
             """
             <label style="font-weight:normal; white-space: nowrap;">
@@ -2232,7 +2254,7 @@ with tabs[1]:
             unsafe_allow_html=True,
         )
 
-    with col2:
+    with col3:
         skip_earnings = st.toggle(label="", value=False, key="skip_earnings", help=None)
 
     if skip_earnings:
@@ -2801,7 +2823,7 @@ def calculate_selected_indicators(df, selected_indicators, timeframe='1h'):
 
 
 
-#------------------- BULLISH SMART MONEY -------------------#
+#------------------- BULLISH Liquidity -------------------#
 
 
 
@@ -3434,7 +3456,7 @@ def calculate_selected_indicators_bearish(df: pd.DataFrame, selected_indicators:
 
 
 
-#------------------- BEARISH SMART MONEY -------------------#
+#------------------- BEARISH Liquidity -------------------#
 
 
 
@@ -3525,7 +3547,7 @@ def calculate_smc_signals_bearish(df):
 
 with tabs[2]:
     st.markdown(f"<h2 style='color: {primary_color};'>Equity</h2>", unsafe_allow_html=True)
-    st.write("Not Available in Beta.")
+    st.write("Page in construction.")
     if st.session_state.active_tab == "Equity":
         st.session_state.active_tab = "Equity"
 
@@ -3692,6 +3714,11 @@ with tabs[3]:
         )
 
 
+
+        st.markdown('<div style="margin-top: 20px;"></div>', unsafe_allow_html=True)
+
+
+
         # --- Load / Save Settings ---
         def load_settings():
             if os.path.exists(SETTINGS_FILE):
@@ -3780,7 +3807,7 @@ with tabs[3]:
                 "High Volume Bullish", "High Volume Bearish", "Elder Force Index Bullish", 
                 "Elder Force Index Bearish"
             ],
-            "Smart Money Concepts": [
+            "Liquidity Concepts": [
                 "BOS Bullish", "Liquidity Sweep Bullish", "Order Block Bullish", "FVG Bullish", 
                 "Discount Bullish", "BOS Bearish", "Liquidity Sweep Bearish", "Order Block Bearish", 
                 "FVG Bearish", "Discount Bearish"
@@ -3795,7 +3822,7 @@ with tabs[3]:
             "Momentum": get_signals_by_type("Bullish", "Momentum Indicators"),
             "Volatility": get_signals_by_type("Bullish", "Volatility Indicators"),
             "Volume": get_signals_by_type("Bullish", "Volume Indicators"),
-            "Smart Money": get_signals_by_type("Bullish", "Smart Money Concepts")
+            "Liquidity": get_signals_by_type("Bullish", "Liquidity Concepts")
         }
 
         bearish_categories = {
@@ -3803,7 +3830,7 @@ with tabs[3]:
             "Momentum": get_signals_by_type("Bearish", "Momentum Indicators"),
             "Volatility": get_signals_by_type("Bearish", "Volatility Indicators"),
             "Volume": get_signals_by_type("Bearish", "Volume Indicators"),
-            "Smart Money": get_signals_by_type("Bearish", "Smart Money Concepts")
+            "Liquidity": get_signals_by_type("Bearish", "Liquidity Concepts")
         }
 
 
@@ -3978,7 +4005,7 @@ with tabs[3]:
 
                 # Define which categories go in which columns
                 col1_cats = ["Moving Averages", "Momentum", "Volatility"]
-                col2_cats = ["Volume", "Smart Money"]
+                col2_cats = ["Volume", "Liquidity"]
 
                 col1, col2 = st.columns(2)
 
@@ -4191,7 +4218,7 @@ with tabs[3]:
         <style>
         .custom-black-box {
             position: absolute;
-            top: -568px;           /* Moves box up by 100px */
+            top: -609px;           /* Moves box up */
             left: 152.5%;             /* Moves box 20% to the right from centered 50% */
             width: 100%;
             height: 395px;
@@ -4421,9 +4448,11 @@ with tabs[3]:
                 """
                 <div style="
                     border-left: 1px solid #4f5158; 
-                    height: 255px;      /* fixed height since 100% won't work */
+                    height: 245px;      /* fixed height since 100% won't work */
                     margin: 0 auto;     /* centers horizontally */
                     width: 0;           /* no width, border is visible */
+                    position: relative;
+                    top: -11px;  /* ↑ Moves up 20px */
                 "></div>
                 """,
                 unsafe_allow_html=True
@@ -5490,7 +5519,7 @@ with tabs[3]:
             "OBV Bullish", "OBV Bearish", "CMF Bullish", "CMF Bearish", "Accumulation/Distribution Bullish", "Accumulation/Distribution Bearish",
             "High Volume Bullish", "High Volume Bearish", "Elder Force Index Bullish", "Elder Force Index Bearish"
         ],
-        "Smart Money Concepts": [
+        "Liquidity Concepts": [
             "BOS Bullish", "Liquidity Sweep Bullish", "Order Block Bullish", "FVG Bullish", "Discount Bullish",
             "BOS Bearish", "Liquidity Sweep Bearish", "Order Block Bearish", "FVG Bearish", "Discount Bearish"
         ]
@@ -5506,8 +5535,8 @@ with tabs[3]:
     bearish_momentum = get_signals_by_type("Bearish", "Momentum Indicators")
     bullish_volume = get_signals_by_type("Bullish", "Volume Indicators")
     bearish_volume = get_signals_by_type("Bearish", "Volume Indicators")
-    bullish_smart = get_signals_by_type("Bullish", "Smart Money Concepts")
-    bearish_smart = get_signals_by_type("Bearish", "Smart Money Concepts")
+    bullish_smart = get_signals_by_type("Bullish", "Liquidity Concepts")
+    bearish_smart = get_signals_by_type("Bearish", "Liquidity Concepts")
     bullish_ma = get_signals_by_type("Bullish", "Moving Averages")
     bearish_ma = get_signals_by_type("Bearish", "Moving Averages")
 
@@ -7039,9 +7068,7 @@ with tabs[-1]:  # Replace with tabs[-1] in your actual app
         def terms_dialog():
             st.markdown("""
             ### Terms of Service
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor 
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis 
-            nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            Dummy Text.
             """)
             if st.button("Close", key="terms_close"):
                 st.rerun()
@@ -7051,9 +7078,7 @@ with tabs[-1]:  # Replace with tabs[-1] in your actual app
         def privacy_dialog():
             st.markdown("""
             ### Privacy Policy
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore 
-            eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt 
-            in culpa qui officia deserunt mollit anim id est laborum.
+            Dummy Text.
             """)
             if st.button("Close", key="privacy_close"):
                 st.rerun()
@@ -7093,7 +7118,7 @@ with tabs[-1]:  # Replace with tabs[-1] in your actual app
         def eula_dialog():
             st.markdown("""
             ### End-User License Agreement
-            Dummy Text
+            Dummy Text.
             """)
             if st.button("Close", key="eula_close"):
                 st.rerun()
@@ -7111,7 +7136,7 @@ with tabs[-1]:  # Replace with tabs[-1] in your actual app
         with col2:
             st.markdown("---")
 
-        st.markdown('<div style="height:10px;"></div>', unsafe_allow_html=True)
+        st.markdown('<div style="height:40px;"></div>', unsafe_allow_html=True)
 
 
         with st.form(key="dialogue_form"):
@@ -7330,7 +7355,7 @@ with tabs[-1]:  # Replace with tabs[-1] in your actual app
 
 
 
-st.markdown("<div style='height:50px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:50px'></div>", unsafe_allow_html=True)
 
 
 
@@ -7507,27 +7532,24 @@ with tabs[-2]:
 
 
     def save_settings_to_file():
-        to_save = {}
-        keys_to_save = [
-            "tab_list", "tab_select", "per_tab_data",
-            "manual_tickers", "manual_disliked",
-            "two_tab_selected_category",
-            "manual_selected_category",
-            
-        ]
-        for cat in ["Options", "ETFs", "Equity", "Crypto"]:
-            keys_to_save.extend([
-                f"two_tab_urls_input_{cat}",
-                f"two_tab_disliked_url_{cat}",
-                f"two_tab_max_tickers_{cat}",
-                f"manual_tickers_{cat}",
-            ])
-        for key in keys_to_save:
-            if key in st.session_state:
-                to_save[key] = st.session_state[key]
         try:
+            # ✅ READ LIVE FORM VALUES FIRST
+            full_data = default_settings.copy()
+            full_data.update(settings)  # Base settings
+            
+            # ✅ CRITICAL: Override with LIVE session_state form data
+            if urls_key in st.session_state:
+                cat_data["scraper_urls"] = st.session_state[urls_key].strip()
+            if disliked_key in st.session_state:
+                cat_data["url_scraper_disliked"] = st.session_state[disliked_key].strip()
+            if max_key in st.session_state:
+                cat_data["max_tickers"] = int(st.session_state[max_key])
+            if loop_key in st.session_state:
+                cat_data["loop_break"] = int(st.session_state[loop_key])
+                
+            full_data["per_tab_data"] = st.session_state.per_tab_data
             with open(SETTINGS_FILE, "w") as f:
-                json.dump(to_save, f, indent=4)
+                json.dump(full_data, f, indent=4)
         except Exception as e:
             st.error(f"Failed to save settings: {e}")
 
@@ -7555,67 +7577,98 @@ with tabs[-2]:
                 pass
         return url_list, manual_tickers
 
-    def run_scan(category, local_max_tickers, prog_bar_container=None, progress_start=0, total_progress=100):
-        pdata = st.session_state.per_tab_data["Scraper"]
-        cd = pdata["category_data"][category]
-        cd["scraper_urls"] = st.session_state.get(f"two_tab_urls_input_{category}", "")
-        cd["url_scraper_disliked"] = st.session_state.get(f"two_tab_disliked_url_{category}", "")
-        cd["max_tickers"] = st.session_state.get(f"two_tab_max_tickers_{category}", 50)
+    import time
+    import streamlit as st
+    import re
 
-        url_list, manual_tickers = parse_mixed_input(cd["scraper_urls"])
-        disliked_set = {t.strip().upper() for t in cd["url_scraper_disliked"].split(",") if t.strip()}
+
+
+    def run_scan(category,
+                local_max_tickers,
+                urls_input="",          # NEW
+                disliked_input="",      # NEW
+                prog_bar_container=None,
+                progress_start=0,
+                total_progress=100):
+
+        # === Use passed values or fallback to session_state ===
+        if urls_input:
+            raw_urls = urls_input
+            raw_disliked = disliked_input
+        else:
+            urls_key = f"form_urls_{category}"
+            disliked_key = f"form_disliked_{category}"
+            raw_urls = st.session_state.get(urls_key, "").strip()
+            raw_disliked = st.session_state.get(disliked_key, "").strip()
+
+        url_list, manual_tickers = parse_mixed_input(raw_urls)
+        disliked_set = {t.strip().upper() for t in raw_disliked.split(",") if t.strip()}
+
         all_tickers = []
-        log = f"=== Scanning {category} ===\n"
+        detail_log = f"=== Scanning {category} ===\n"
+        if manual_tickers:
+            detail_log += f"✔️ {len(manual_tickers)} manual tickers\n"
 
         num_urls = len(url_list)
-        progress_pct = 0
+        if num_urls == 0 and not manual_tickers:
+            detail_log += "No URLs or manual tickers provided.\n"
+            return detail_log, []  # Only 2 values
 
+        # === Scan each URL ===
         for i, url in enumerate(url_list):
-            log += f"🌐 {url}\n"
-            tickers = get_stock_tickers_from_url(url, local_max_tickers)
-            if tickers:
-                log += f"✔️ {len(tickers)} tickers found\n"
-                all_tickers.extend(tickers)
-            else:
-                log += "❌ No tickers found or error\n"
+            detail_log += f"🌐 Fetching: {url}\n"
+            try:
+                tickers = get_stock_tickers_from_url(url, local_max_tickers)
+                if tickers:
+                    detail_log += f"✔️ {len(tickers)} ticker{'s' if len(tickers) != 1 else ''} found\n"
+                    all_tickers.extend(tickers)
+                else:
+                    detail_log += "❌ No tickers found on this page.\n"
+            except Exception as e:
+                detail_log += f"❌ Error fetching {url}: {str(e)}\n"
+
+            # Progress update
             progress_pct = 100 * (i + 1) / max(num_urls, 1)
-
             if prog_bar_container:
-                render_progress_bar(prog_bar_container, progress_start + progress_pct * total_progress / 100)
-
+                render_progress_bar(prog_bar_container, progress_start + progress_pct * (total_progress / 100))
             time.sleep(0.2)
 
-        if prog_bar_container:
-            render_progress_bar(prog_bar_container, progress_start + total_progress)
-
-        # Add manual tickers directly
         all_tickers.extend(manual_tickers)
 
-        all_tickers_upper = [t.strip().upper() for t in all_tickers if t.strip()]
+        # === Clean and filter ===
+        all_tickers_upper = [t.strip().upper() for t in all_tickers if t.strip().isalpha()]
         total_retrieved = len(all_tickers_upper)
 
         seen = set()
-        final_all_tickers = []
+        unique_tickers = []
         for ticker in all_tickers_upper:
             if ticker not in seen:
                 seen.add(ticker)
-                final_all_tickers.append(ticker)
-        duplicates_removed = total_retrieved - len(final_all_tickers)
+                unique_tickers.append(ticker)
 
-        filtered_tickers = [t for t in final_all_tickers if t not in disliked_set]
-        manually_removed = len(set(final_all_tickers) & disliked_set)
+        duplicates_removed = total_retrieved - len(unique_tickers)
+        filtered_tickers = [t for t in unique_tickers if t not in disliked_set]
+        manually_removed = len(unique_tickers) - len(filtered_tickers)
 
+        # Save results
+        pdata = st.session_state.scraper_data["Scraper"]
+        cd = pdata["category_data"].setdefault(category, {})
         cd["final_tickers"] = filtered_tickers
 
+        # === Summary log (only returned, not appended during Scan All) ===
+        summary_log = f"Summary for {category}:\n"
+        summary_log += f"Total retrieved (before dedupe): {total_retrieved}\n"
+        summary_log += f"Duplicates removed: {duplicates_removed}\n"
+        summary_log += f"Manually excluded: {manually_removed}\n"
+        summary_log += f"Final tickers: {len(filtered_tickers)}\n"
 
-        log += (
-            f"Total tickers retrieved: {total_retrieved}\n"
-            + f"Duplicates removed: {duplicates_removed}\n"
-            + f"Manually Removed: {manually_removed}\n"
-            + f"Final tickers: {len(filtered_tickers)}\n\n"
-        )
 
-        return log, filtered_tickers
+        # Final progress
+        if prog_bar_container:
+            render_progress_bar(prog_bar_container, progress_start + total_progress)
+
+        # Only return detail_log and final tickers
+        return detail_log, filtered_tickers
 
 
     def render_progress_bar(container, pct, color=PRIMARY_COLOR):
@@ -7753,7 +7806,7 @@ with tabs[-2]:
 
         with word_col:
             st.markdown(
-                '<p style="font-size:1.0rem; color:gray; margin-bottom:0;' \
+                '<p style="font-size:1.0rem; color:gray; margin-bottom:-50px;' \
                 '">Some websites may not work if they require login or use JavaScript rendering.</p>',
                 unsafe_allow_html=True,
             )
@@ -7910,6 +7963,14 @@ with tabs[-2]:
                     margin: 0 !important;
                     padding: 0 !important;
                 }}
+
+
+
+
+               
+
+
+
                 </style>
                 """,
                 unsafe_allow_html=True,
@@ -7925,6 +7986,7 @@ with tabs[-2]:
                     if st.button("", key=f"dot_btn_{i}", use_container_width=True, help=tooltip):
                         if st.session_state.dot != i:
                             st.session_state.dot = i
+                            
                             st.query_params["dot"] = str(i)
                             st.rerun()
 
@@ -7942,23 +8004,9 @@ with tabs[-2]:
             # Show selected form content
             selected_category = categories[st.session_state.dot]
 
-        # Assuming per_tab_data and selected_category are already defined
-        pdata = st.session_state.per_tab_data["Scraper"]
-        cat_data = pdata["category_data"].setdefault(
-            selected_category,
-            {
-                "scraper_urls": "",
-                "url_scraper_disliked": "",
-                "final_tickers": [],
-                "max_tickers": 50,
-            },
-        )
 
-        urls_key = f"two_tab_urls_input_{selected_category}"
-        disliked_key = f"two_tab_disliked_url_{selected_category}"
-        max_key = f"two_tab_max_tickers_{selected_category}"
-        loop_break_key = f"two_tab_loop_break_{selected_category}"
-        form_key = f"two_tab_scraper_form_{st.session_state.tab_select}_{selected_category}"
+
+
 
         import time
         from datetime import datetime, time as dtime
@@ -7975,14 +8023,6 @@ with tabs[-2]:
         if "trigger_trade" not in st.session_state:
             st.session_state.trigger_trade = False
 
-        if f"two_tab_urls_input_{selected_category}" not in st.session_state:
-            st.session_state[f"two_tab_urls_input_{selected_category}"] = cat_data.get("scraper_urls", "")
-        if f"two_tab_max_tickers_{selected_category}" not in st.session_state:
-            st.session_state[f"two_tab_max_tickers_{selected_category}"] = cat_data.get("max_tickers", 50)
-        if f"two_tab_loop_break_{selected_category}" not in st.session_state:
-            st.session_state[f"two_tab_loop_break_{selected_category}"] = 60
-        if f"two_tab_disliked_url_{selected_category}" not in st.session_state:
-            st.session_state[f"two_tab_disliked_url_{selected_category}"] = cat_data.get("url_scraper_disliked", "")
 
         if "trade_loop_count" not in st.session_state:
             st.session_state.trade_loop_count = 0
@@ -7991,140 +8031,387 @@ with tabs[-2]:
 
 
 
-        # Add CSS to move the form up
+
+
+
+
+
+
+   
+
+
         st.markdown("""
-            <style>
-            div[data-testid="stForm"] {
-                margin-top: -20px;
-            }
-            </style>
+        <style>
+        /* Container: remove extra styling, allow overflow */
+        div[data-testid="stTextArea"] {
+            background: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin-bottom: 0rem !important;  /* space for bottom border */
+        }
+
+
+
+
+
+
+        /* Focus: no font change, subtle highlight */
+        div[data-testid="stTextArea"] textarea:focus {
+            font-size: 12px !important;
+            box-shadow: none !important;
+            outline: none !important;
+            border-color: #F5BF03 !important;
+        }
+                    
+                    
+        </style>
         """, unsafe_allow_html=True)
 
 
-        # --- Form for inputs and scan buttons ---
-        
+
+
+
+
+
+        st.markdown("""
+        <style>
+        /* Target the inner textarea, not just the wrapper */
+        div[data-testid="stTextArea"] textarea {
+            margin-bottom: 0px !important;  /* pulls next element UP */
+        }
+
+        """, unsafe_allow_html=True)
+
+
+
+
+
+        st.markdown(
+            """
+            <style>
+            /* Pull content upward inside Streamlit layout */
+            .stForm {
+                transform: translateY(-35px) !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+
+
+        def render_progress_bar_container():
+            return st.empty()
+
+        def render_progress_bar(container, value):
+            with container:
+                st.markdown(
+                    f"""
+                    <div style="background-color: #2b3e56; padding: 0px; border-radius: 10px; text-align: center; margin: 15px 0; box-shadow: 0 4px 8px rgba(0,0,0,0.3);">
+                        <div style="background-color: #FFD700; height: 5px; width: {value}%; border-radius: 8px; transition: width 0.5s ease-in-out; position: relative;">
+                            <span style="position: absolute; width: 100%; 
+                                {int(value)}% Complete
+                            </span>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+
+
+
+
+
+
+        prog_bar_container = render_progress_bar_container()  # st.empty()
+
+        import json
+        import os
+
+        SCRAPER_FILE = "scraper_settings.json"  # NEW DEDICATED FILE
+
+        # =========================================================
+        # 1. LOAD SCRAPER DATA (refresh-safe)
+        # =========================================================
+        def load_scraper_data():
+            if os.path.exists(SCRAPER_FILE):
+                try:
+                    with open(SCRAPER_FILE, "r") as f:
+                        return json.load(f)
+                except:
+                    pass
+            return {"Scraper": {"category_data": {}}}
+
+        # Load ONCE at top of app (before this block)
+        if "scraper_data" not in st.session_state:
+            st.session_state.scraper_data = load_scraper_data()
+
+        # =========================================================
+        # 2. ENSURE cat_data exists
+        # =========================================================
+        pdata = st.session_state.scraper_data["Scraper"]  # NEW SOURCE
+        selected_category = categories[st.session_state.dot]
+        cat_data = pdata["category_data"].setdefault(
+            selected_category,
+            {"scraper_urls": "", "url_scraper_disliked": "", "final_tickers": [],
+            "max_tickers": 100, "loop_break": 60}
+        )
+
+        # =========================================================
+        # 3. KEYS
+        # =========================================================
+        urls_key = f"form_urls_{selected_category}"
+        disliked_key = f"form_disliked_{selected_category}"
+        max_key = f"form_max_tickers_{selected_category}"
+        loop_key = f"form_loop_break_{selected_category}"
+
+        # =========================================================
+        # 4. SESSION INIT FROM SCRAPER FILE
+        # =========================================================
+        if urls_key not in st.session_state:
+            st.session_state[urls_key] = cat_data.get("scraper_urls", "")
+        if disliked_key not in st.session_state:
+            st.session_state[disliked_key] = cat_data.get("url_scraper_disliked", "")
+        if max_key not in st.session_state:
+            st.session_state[max_key] = cat_data.get("max_tickers", 100)
+        if loop_key not in st.session_state:
+            st.session_state[loop_key] = cat_data.get("loop_break", 60)
+
+        # =========================================================
+        # 5. SAVE TO DEDICATED SCRAPER FILE
+        # =========================================================
+        def save_scraper_data():
+            # CAPTURE LIVE FORM DATA
+            cat_data["scraper_urls"] = st.session_state.get(urls_key, "").strip()
+            cat_data["url_scraper_disliked"] = st.session_state.get(disliked_key, "").strip()
+            cat_data["max_tickers"] = int(st.session_state.get(max_key, 100))
+            cat_data["loop_break"] = int(st.session_state.get(loop_key, 60))
+            
+            try:
+                with open(SCRAPER_FILE, "w") as f:
+                    json.dump(st.session_state.scraper_data, f, indent=4)
+                return True
+            except Exception as e:
+                st.error(f"Save failed: {e}")
+                return False
+
+        # =========================================================
+        # 6. YOUR FORM (unchanged)
+        # =========================================================
         with st.form(key=f"two_tab_scraper_form_{st.session_state.tab_select}_{selected_category}"):
-            urls_input = st.text_area(
+            st.text_area(
                 "Paste each URL on a separate line:",
-                height=120,
-                key=f"two_tab_urls_input_{selected_category}",
-                help="Enter URLs containing ticker lists (one per line), or enter tickers manually."
+                height=162,
+                key=urls_key,
+                help="Enter URLs containing ticker lists (one per line)."
             )
-            max_tickers = st.number_input(
-                "Max total tickers (per URL):",
-                min_value=1,
-                max_value=200,
-                step=50,
-                key=f"two_tab_max_tickers_{selected_category}",
-                help="Maximum number of tickers to extract from all URLs combined."
-            )
-            loop_break = st.number_input(
+
+            col1, col15, col2 = st.columns([3, 0.08, 1])
+            with col1:
+                st.number_input(
+                    "Max total tickers (per URL):",
+                    min_value=1,
+                    max_value=200,
+                    step=50,
+                    key=max_key,
+                    help="Maximum number of tickers to extract."
+                )
+            with col2:
+                save_settings_btn = st.form_submit_button("💾 Save", use_container_width=True, type="primary")
+
+            st.number_input(
                 "Time between loops (seconds):",
                 min_value=10,
                 max_value=3600,
                 step=60,
-                key=f"two_tab_loop_break_{selected_category}",
-                help="Time delay in seconds between each trading loop."
+                key=loop_key,
+                help="Time delay between loops."
             )
-            disliked_url = st.text_input(
+
+            st.text_input(
                 "Remove tickers:",
-                value=st.session_state.get(f"two_tab_disliked_url_{selected_category}", cat_data.get("url_scraper_disliked", "")),
-                key=f"two_tab_disliked_url_{selected_category}",
-                help="Enter tickers to exclude, separated by commas."
+                key=disliked_key,
+                help="Enter tickers to exclude."
             )
 
             st.markdown("""
-            <style>
-            .stFormSubmitButton > button {
-                margin-top: 10px;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+                <style>
+                .stFormSubmitButton > button { margin-top: 10px; }
+                </style>
+                """, unsafe_allow_html=True)
 
-            col1, gap1, col2 = st.columns([2, 0.1, 2])
-
+            col1, gap, col2 = st.columns([2, 0.1, 2])
             with col1:
-                scan_btn = st.form_submit_button(f"Scan {selected_category}", use_container_width=True, type="tertiary")
+                scan_btn = st.form_submit_button(f"Scan {selected_category}", use_container_width=True)
             with col2:
-                scan_all_btn = st.form_submit_button("Scan All", use_container_width=True, type="tertiary")
+                scan_all_btn = st.form_submit_button("Scan All", use_container_width=True)
 
             prog_bar_container = render_progress_bar_container()
+
+        # =========================================================
+        # 7. BUTTONS - SAVE TO SCRAPER FILE
+        # =========================================================
+
+
+        if scan_btn or scan_all_btn:
+            save_scraper_data()  # Auto-save before scan
+
+
+
+
+        # =========================================================
+        # SINGLE SCAN - FROM SCRAPER FILE
+        # =========================================================
+
+        if scan_btn:
+            save_scraper_data()
+            st.session_state["show_all_tickers"] = False
+
+            prog_bar_container.empty()
+            render_progress_bar(prog_bar_container, 0)
+
+            max_tickers = int(st.session_state[max_key])
+
+            detail_log, tickers = run_scan(
+                selected_category,
+                max_tickers,
+                prog_bar_container=prog_bar_container,
+                progress_start=0,
+                total_progress=100
+            )
+
+            tickers = tickers or []
+
+            # === CLEAN FINAL SUMMARY (Same style as Scan All) ===
+            total_retrieved = len(tickers)  # Already filtered and deduped per category
+            duplicates_removed = 0  # Per-category duplicates already handled in run_scan
+            final_count = len(tickers)
+
+            log_output = detail_log + "\n"
+
+            log_output += "=== SUMMARY ===\n"
+
+            log_output += f"Total tickers: {total_retrieved}\n"
+            log_output += f"Duplicates removed: {duplicates_removed}\n"
+            log_output += f"Final tickers: {final_count}\n"
+            log_output += f"\n"
+
+
+
+            st.session_state["two_tab_scanning_log"] += log_output
+
+            render_progress_bar(prog_bar_container, 100)
+            time.sleep(0.7)
+
+            # Save results
+            if "category_tickers" not in st.session_state:
+                st.session_state["category_tickers"] = {}
+            st.session_state["category_tickers"][selected_category] = tickers
+            cat_data["final_tickers"] = tickers
+
+            version_key = f"two_tab_tickers_version_{selected_category}"
+            st.session_state[version_key] = st.session_state.get(version_key, 0) + 1
+
             prog_bar_container.empty()
 
-            if scan_btn:
-                st.session_state["show_all_tickers"] = False
-                # Ensure cat_data is the correct dictionary
-                cat_data = pdata["category_data"].setdefault(
-                    selected_category,
-                    {
-                        "scraper_urls": "",
-                        "url_scraper_disliked": "",
-                        "final_tickers": [],
-                        "max_tickers": 50,
-                    }
+            if tickers:
+                st.success(f"✅ Found {len(tickers)} tickers!")
+            else:
+                st.warning("⚠️ No tickers found — check URLs or page content.")
+
+            st.rerun()
+
+
+        # =========================================================
+        # SCAN ALL - FROM SCRAPER FILE FOR ALL CATEGORIES (FIXED)
+        # =========================================================
+        if scan_all_btn:
+            st.session_state["show_all_tickers"] = True
+            all_tickers = {}
+            total_retrieved = 0
+            total_duplicates = 0
+            total_excluded = 0
+            grand_total_unique = 0
+
+            total_categories = len(categories)
+            progress_per_category = 100.0 / total_categories if total_categories else 100.0
+            current_progress = 0.0
+
+            prog_bar_container.empty()
+            render_progress_bar(prog_bar_container, 0)
+
+            for cat in categories:
+                this_data = pdata["category_data"].setdefault(cat, {
+                    "scraper_urls": "", "url_scraper_disliked": "", "final_tickers": [],
+                    "max_tickers": 100, "loop_break": 60
+                })
+
+                urls_saved = this_data.get("scraper_urls", "").strip()
+                disliked_saved = this_data.get("url_scraper_disliked", "").strip()
+                max_tickers = this_data.get("max_tickers", 100)
+
+                detail_log, tickers = run_scan(
+                    cat,
+                    max_tickers,
+                    urls_input=urls_saved,
+                    disliked_input=disliked_saved,
+                    prog_bar_container=prog_bar_container,
+                    progress_start=current_progress,
+                    total_progress=progress_per_category
                 )
-                cat_data["scraper_urls"] = urls_input
-                cat_data["url_scraper_disliked"] = disliked_url
-                cat_data["max_tickers"] = max_tickers
 
-                st.session_state["two_tab_scanning_log"] = ""
-                log, tickers = run_scan(selected_category, max_tickers, prog_bar_container)
-                st.session_state["two_tab_scanning_log"] += log
-                st.session_state["category_tickers"] = tickers
-                # Update final_tickers in pdata
-                cat_data["final_tickers"] = tickers
+                tickers = tickers or []
+                all_tickers[cat] = tickers
+                this_data["final_tickers"] = tickers
 
-                prog_bar_container.empty()
-                save_settings_to_file()
+                # Append only brief per-category log
+                st.session_state["two_tab_scanning_log"] += detail_log + "\n"
 
-            if scan_all_btn:
-                st.session_state["show_all_tickers"] = True
-                st.session_state["two_tab_scanning_log"] = ""
-                all_tickers = {}
+                # Accumulate stats (you can expand this if you track more)
+                grand_total_unique += len(tickers)
 
-                # Total number of categories for progress calculation
-                total_categories = len(categories)
-                progress_per_category = 100.0 / total_categories if total_categories > 0 else 100.0
-                current_progress = 0.0
+                current_progress += progress_per_category
+                render_progress_bar(prog_bar_container, current_progress)
 
-                for i, cat in enumerate(categories):
-                    # Fetch or initialize category data
-                    this_data = pdata["category_data"].setdefault(
-                        cat,
-                        {
-                            "scraper_urls": "",
-                            "url_scraper_disliked": "",
-                            "final_tickers": [],
-                            "max_tickers": 50,
-                        },
-                    )
-                    # Pull current input values from session state
-                    urls = st.session_state.get(f"two_tab_urls_input_{cat}", "")
-                    disliked = st.session_state.get(f"two_tab_disliked_url_{cat}", "")
-                    max_num = st.session_state.get(f"two_tab_max_tickers_{cat}", 50)
+            # Final progress
+            render_progress_bar(prog_bar_container, 100)
+            time.sleep(0.7)
+            prog_bar_container.empty()
 
-                    # Update the data dictionary for this category
-                    this_data["scraper_urls"] = urls
-                    this_data["url_scraper_disliked"] = disliked
-                    this_data["max_tickers"] = max_num
+            # === CLEAN FINAL SUMMARY ===
+            render_progress_bar(prog_bar_container, 100)
+            time.sleep(0.7)
+            prog_bar_container.empty()
 
-                    # Run the scan for this category with progress
-                    log, tickers = run_scan(cat, max_num, prog_bar_container, progress_start=current_progress, total_progress=progress_per_category)
-                    st.session_state["two_tab_scanning_log"] += log
-                    all_tickers[cat] = tickers
-                    this_data["final_tickers"] = tickers
+            # Combine all tickers from all categories and dedupe globally
+            all_final_tickers = []
+            for cat_tickers in all_tickers.values():
+                all_final_tickers.extend(cat_tickers)
+            
+            # Global deduplication across categories (optional — remove if you want per-category duplicates preserved)
+            unique_global = sorted(set(all_final_tickers))
+            total_retrieved_global = len(all_final_tickers)
+            duplicates_removed_global = total_retrieved_global - len(unique_global)
 
-                    # Update progress
-                    current_progress += progress_per_category
-                    render_progress_bar(prog_bar_container, current_progress)
+            st.session_state["two_tab_scanning_log"] += "=== SUMMARY ===\n"
+            st.session_state["two_tab_scanning_log"] += f"Total tickers: {total_retrieved_global}\n"
+            st.session_state["two_tab_scanning_log"] += f"Duplicates removed: {duplicates_removed_global}\n"
+            st.session_state["two_tab_scanning_log"] += f"Final tickers: {len(unique_global)}\n"
+            st.session_state["two_tab_scanning_log"] += f"\n"
 
-                # Ensure progress bar hits 100% and stays visible briefly
-                render_progress_bar(prog_bar_container, 100.0)
-                time.sleep(0.1)  # Brief delay (0.5 seconds) to show full bar
-                prog_bar_container.empty()
-                st.session_state["category_tickers"] = all_tickers
-                save_settings_to_file()
-                st.rerun()  # Force refresh to update UI
+
+
+            # Save combined results
+            st.session_state["category_tickers"] = all_tickers
+            st.session_state["two_tab_tickers_all_version"] = st.session_state.get("two_tab_tickers_all_version", 0) + 1
+            for cat in categories:
+                st.session_state[f"two_tab_tickers_version_{cat}"] = st.session_state.get(f"two_tab_tickers_version_{cat}", 0) + 1
+
+            st.rerun()
+
+
 
 
 
@@ -8283,56 +8570,53 @@ with tabs[-2]:
 
 
 
-            # --- Scraped Tickers ---
-            st.markdown("<div style='height: 29.5px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 39px;'></div>", unsafe_allow_html=True)
             st.markdown("#### Scraped Tickers")
 
             tickers_data = st.session_state.get("category_tickers", {})
 
             if st.session_state.get("show_all_tickers", False) and isinstance(tickers_data, dict):
+                # Show all categories
                 output_text = ""
                 for cat in categories:
                     tickers = tickers_data.get(cat, [])
-                    output_text += f"{cat}\n" + ("-" * 15) + "\n"
+                    output_text += f"{cat}\n" + ("-" * 20) + "\n"
                     if tickers:
                         output_text += "\n".join(tickers) + "\n\n"
                     else:
                         output_text += "No tickers found.\n\n"
+                
+                # Use a dynamic key to force refresh
+                all_version = st.session_state.get("two_tab_tickers_all_version", 0)
                 st.text_area(
                     "",
                     output_text.strip(),
-                    height=242,
+                    height=262,
                     disabled=True,
                     label_visibility="collapsed",
-                    key=f"two_tab_scraped_tickers_combined_out",
+                    key=f"two_tab_scraped_tickers_combined_out_{all_version}",
                     placeholder="No tickers scraped yet."
                 )
             else:
-                tickers_to_display = tickers_data if isinstance(tickers_data, list) else []
+                # Single category view
+                selected_tickers = tickers_data.get(selected_category, []) if isinstance(tickers_data, dict) else []
+                
+                # CRITICAL: Use version in key to force Streamlit to recreate the widget
+                version = st.session_state.get(f"two_tab_tickers_version_{selected_category}", 0)
+                
                 st.text_area(
                     "",
-                    "\n".join(tickers_to_display),
-                    height=242,
+                    "\n".join(selected_tickers),
+                    height=262,
                     disabled=True,
                     label_visibility="collapsed",
-                    placeholder=f"No tickers scraped yet for {selected_category}.",
-                    key=f"two_tab_scraped_tickers_{selected_category}"
+                    key=f"two_tab_scraped_tickers_{selected_category}_{version}",  # ← This forces update!
+                    placeholder=f"No tickers scraped yet for {selected_category}."
                 )
 
-            st.markdown(
-                """
-                <style>
-                textarea {
-                    border: 1.3px solid rgba(211, 211, 211, 0.3) !important;
-                    border-radius: 10px !important;
-                    padding: 8px !important;
-                    box-sizing: border-box !important;
-                    background-color: rgb(173, 216, 230, 0.05) !important;
-                }
-                </style>
-                """,
-                unsafe_allow_html=True
-            )
+
+
+
 
 
 
@@ -8341,7 +8625,7 @@ with tabs[-2]:
             # Scanning Log
             # -------------------------
 
-            st.markdown("<div style='height: 43px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height: 47px;'></div>", unsafe_allow_html=True)
 
       
 
@@ -8664,13 +8948,12 @@ with tabs[-2]:
 
         with left_col:
 
-            st.markdown("<div style='margin-top: 18px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 0px'></div>", unsafe_allow_html=True)
 
             trading_log_container = st.empty()  # For real-time Trading Log updates
 
             # --- Trading Log Display ---
-            st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
+
             st.markdown("#### Trading Log")
             trading_log_container = st.empty()
             trading_log_container.text_area(
