@@ -5017,6 +5017,11 @@ with tabs[3]:
 
 
 
+        def normalize_bias(bias):
+            if not isinstance(bias, str):
+                return "Neutral"
+            return bias.strip().title()
+
 
 
         with st.container():
@@ -5034,24 +5039,33 @@ with tabs[3]:
             """
             st.markdown(market_html, unsafe_allow_html=True)
 
+
             def bias_box_html(symbol, bias):
-                safe_bias = bias if bias in bias_colors else 'Error'
-                color = bias_colors.get(safe_bias, "#c0c0c0")
-                bg = bias_bg[bias]
+                safe_bias = normalize_bias(bias)
+
+                color = bias_colors.get(safe_bias, "#9ca3af")  # gray fallback
+                bg = bias_bg.get(
+                    safe_bias,
+                    "linear-gradient(120deg, #2b2b2b, #3a3a3a)"
+                )
+
                 return f"""
                 <div class="bias-box" style="--glow-color:{color}; background:{bg};">
                     <div class="label">{symbol}</div>
-                    <div class="subtext">{bias}</div>
+                    <div class="subtext">{safe_bias}</div>
                 </div>
                 """
 
-            col_left, col_right = st.columns(2)
+
+
             with col_left:
-                st.markdown(bias_box_html('SPY', bias_details['SPY']), unsafe_allow_html=True)
-                st.markdown(bias_box_html('DIA', bias_details['DIA']), unsafe_allow_html=True)
+                st.markdown(bias_box_html('SPY', bias_details.get('SPY')), unsafe_allow_html=True)
+                st.markdown(bias_box_html('DIA', bias_details.get('DIA')), unsafe_allow_html=True)
+
             with col_right:
-                st.markdown(bias_box_html('QQQ', bias_details['QQQ']), unsafe_allow_html=True)
-                st.markdown(bias_box_html('UUP', bias_details['UUP']), unsafe_allow_html=True)
+                st.markdown(bias_box_html('QQQ', bias_details.get('QQQ')), unsafe_allow_html=True)
+                st.markdown(bias_box_html('UUP', bias_details.get('UUP')), unsafe_allow_html=True)
+
 
         st.markdown('<div style="margin-bottom: 30px;"></div>', unsafe_allow_html=True)
 
