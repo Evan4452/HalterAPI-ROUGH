@@ -5058,6 +5058,7 @@ with tabs[3]:
 
 
 
+            col_left, col_right = st.columns(2)
             with col_left:
                 st.markdown(bias_box_html('SPY', bias_details.get('SPY')), unsafe_allow_html=True)
                 st.markdown(bias_box_html('DIA', bias_details.get('DIA')), unsafe_allow_html=True)
