@@ -5034,22 +5034,17 @@ with tabs[3]:
             """
             st.markdown(market_html, unsafe_allow_html=True)
 
-            def bias_box_html(symbol, bias):  # Order: symbol first or adjust as needed
-                if bias == "Bullish":
-                    color = "#2ace49"  # Green
-                elif bias == "Bearish":
-                    color = "#FF4B4B"  # Red
-                else:
-                    color = "#c0c0c0"  # Gray for Neutral, Insufficient Data, errors, etc.
-
+            def bias_box_html(symbol, bias):
+                color = bias_colors[bias]
+                bg = bias_bg[bias]
                 return f"""
-                <div style="padding: 8px 12px; border-radius: 6px; background-color: {color}20; 
-                            border: 1px solid {color}; color: {color}; font-weight: bold; text-align: center;">
-                    {symbol}: {bias}
+                <div class="bias-box" style="--glow-color:{color}; background:{bg};">
+                    <div class="label">{symbol}</div>
+                    <div class="subtext">{bias}</div>
                 </div>
                 """
 
-            col_left, col_mid, col_right = st.columns([1, 0.01, 1])
+            col_left, col_right = st.columns(2)
             with col_left:
                 st.markdown(bias_box_html('SPY', bias_details['SPY']), unsafe_allow_html=True)
                 st.markdown(bias_box_html('DIA', bias_details['DIA']), unsafe_allow_html=True)
@@ -6393,6 +6388,12 @@ def scan_and_trade_etf_stocks(tickers, selected_indicators=None, trading_log_con
             try:
                 # --- Fetch data ---
                 df = fetch_data(symbol, datetime.now() - timedelta(days=130), datetime.now())
+                
+                df = fetch_data(symbol, datetime.now() - timedelta(days=130), datetime.now())
+                ticker_log += f"{symbol} raw fetch: rows={len(df) if df is not None else 'None'}, empty={df.empty if df is not None else 'N/A'}, type(df)={type(df)}\n"
+                if df is not None and not df.empty:
+                    ticker_log += f"Date range: {df.index[0] if hasattr(df.index, '__len__') else 'N/A'} to {df.index[-1] if hasattr(df.index, '__len__') else 'N/A'}\n"
+
                 if isinstance(df.index, pd.MultiIndex):
                     df.index = df.index.get_level_values(1)
                 df.index = pd.to_datetime(df.index)
