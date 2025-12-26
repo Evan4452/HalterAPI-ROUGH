@@ -5017,6 +5017,12 @@ with tabs[3]:
 
 
 
+        if "bias_initialized" not in st.session_state:
+            update_bias()
+            st.session_state.bias_initialized = True
+
+
+
         def normalize_bias(bias):
             if not isinstance(bias, str):
                 return "Neutral"
