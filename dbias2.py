@@ -5035,7 +5035,8 @@ with tabs[3]:
             st.markdown(market_html, unsafe_allow_html=True)
 
             def bias_box_html(symbol, bias):
-                color = bias_colors[bias]
+                safe_bias = bias if bias in bias_colors else 'Error'
+                color = bias_colors.get(safe_bias, "#c0c0c0")
                 bg = bias_bg[bias]
                 return f"""
                 <div class="bias-box" style="--glow-color:{color}; background:{bg};">
