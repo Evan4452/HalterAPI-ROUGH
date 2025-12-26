@@ -4706,7 +4706,7 @@ with tabs[3]:
             justify-content: center;
             align-items: center;
             min-width: 82px;
-            max-width: 115px;
+            max-width: 100%;
             margin-bottom: 8px;
         }}
 
